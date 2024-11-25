@@ -1,0 +1,15 @@
+                                      line1  col1  ...  token  terminal
+pkg_name   text                                    ...                 
+rlang      vec_size                      11    11  ...     11        11
+           enquo                          9     9  ...      9         9
+           caller_env                     6     6  ...      6         6
+tidyselect eval_select                    5     5  ...      5         5
+vctrs      vec_rep_each                   4     4  ...      4         4
+...                                     ...   ...  ...    ...       ...
+cli        cli_warn                       1     1  ...      1         1
+tibble     tibble                         1     1  ...      1         1
+tidyr      backtick_if_not_syntactic      1     1  ...      1         1
+           build_wider_id_cols_expr       1     1  ...      1         1
+vctrs      vec_unique_loc                 1     1  ...      1         1
+
+[70 rows x 8 columns]
