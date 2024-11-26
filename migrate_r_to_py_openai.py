@@ -79,10 +79,14 @@ def execute_command_and_capture_output(cmd):
 
         # Check return code
         if result.returncode != 0:
-            return result.stderr  # Print the captured error output
-        elif "SyntaxError" in result.stderr:
+            return result.stdout + " " + result.stderr  # Print the captured error output
+        elif ("SyntaxError" in result.stderr) \
+        or("AssertionError" in result.stderr) or \
+        ("FAILED" in result.stderr):
             return result.stderr
-        elif"SyntaxError" in result.stdout:
+        elif ("SyntaxError" in result.stdout) or \
+             ("AssertionError" in result.stdout) or \
+             ("FAILED" in result.stdout):
             return result.stdout
         else:
             print("Build completed successfully!")
@@ -93,23 +97,32 @@ def execute_command_and_capture_output(cmd):
 
 
 
-def verify_code_quality(file_path,base_folder):
+def verify_code_quality(file_path,unit_test,base_folder):
     current_dir=os.getcwd()
     os.chdir(base_folder)
     cmd1 = ["python", "-m","py_compile",  file_path]
     cmd2 = ["python", "setup.py", "install"]
-    cmd3 = ["pytest"]
+    cmd3 = ["pytest",f"{unit_test}"]
+    
     result = execute_command_and_capture_output(cmd1)
-    os.chdir(current_dir)
+    
     if result is not None:
-        return result
-    result = execute_command_and_capture_output(cmd2)
-    if result is not None:
-        return result
-    result = execute_command_and_capture_output(cmd3)
-    if result is not None:
+        os.chdir(current_dir)
         return result
     
+    result = execute_command_and_capture_output(cmd2)
+    if result is not None:
+        os.chdir(current_dir)
+        return result
+    
+    """ don't execute unit test
+    result = execute_command_and_capture_output(cmd3)
+    if result is not None:
+        os.chdir(current_dir)
+        return result
+    """
+    
+    os.chdir(current_dir)
     return None
 
 def convert_code(model_name="",import_prefix="",code="",feedback_msg=None,previous_code=None,mode="code",pkg_name=""):
@@ -209,7 +222,7 @@ def update_init_file(pkg_name,module_name, init_path):
         init_file_handle.close()
     
     
-def convert_one_file(file_name="", output_folder="",import_prefix="",feedback_msg=None, old_code=None):
+def convert_one_file(file_name="", output_folder="",import_prefix="",feedback_msg=None, old_code=None,mode="code",pkg_name=""):
     print(f"procesing {file_name}")
     output_file_name = basename(file_name).split(".")[0] + ".py"
     output_file_name = cleanup_file_name(output_file_name)
@@ -219,7 +232,13 @@ def convert_one_file(file_name="", output_folder="",import_prefix="",feedback_ms
             code = file.read()
             input_file_size_kb = os.stat(file_name).st_size/1024.0
             start_time = time.perf_counter()
-            python_converted_code = convert_code(model_name,import_prefix,code,feedback_msg, old_code)
+            python_converted_code = convert_code(model_name=model_name,
+                                                 import_prefix=import_prefix,
+                                                 code=code,
+                                                 feedback_msg = feedback_msg, 
+                                                 old_code = old_code,
+                                                 mode=mode,
+                                                 pkg_name=pkg_name)
             elapsed_time = time.perf_counter() - start_time
             print(f"\nExecution Time: {elapsed_time:.4f} seconds")
             with open(full_output_file_name,"w") as output_file:
@@ -233,21 +252,39 @@ def convert_one_file(file_name="", output_folder="",import_prefix="",feedback_ms
     return full_output_file_name
 
 for r_code in r_code_files:
-    full_output_file_name = convert_one_file(r_code,output_code_folder,import_prefix)
+    full_output_file_name = convert_one_file(file_name=r_code,
+                                             output_folder=output_code_folder,
+                                             import_prefix=import_prefix,
+                                             feedback_msg=None,
+                                             old_code="",
+                                             mode="code",
+                                             pkg_name=output_folder_name)
     module_name = basename(full_output_file_name).split(".")[0]
     update_init_file(pkg_name=output_folder_name,module_name = module_name, init_path=output_code_folder)
     matching_unit_test = find_matching_unit_test(r_code)
     if matching_unit_test is not None:
-            convert_one_file(matching_unit_test,output_test_folder,import_prefix="")
-            feedback=verify_code_quality(full_output_file_name,output_folder)
+            convert_one_file(file_name=matching_unit_test,
+                             output_folder=output_test_folder,
+                             import_prefix="",
+                             feedback_msg=None,
+                             old_code=""
+                             mode="test",
+                             pkg_name=output_folder_name)
+            feedback=verify_code_quality(full_output_file_name,matching_unit_test,output_folder)
             if feedback is not None:
                 # something, syntax fail or unit test fail
                 current_iteration=0
-                while (current_iteration <= max_iterations):
+                while (current_iteration < max_iterations):
                     print(f"Error detected, sedning feedback to llm {feedback}")
-                    full_output_file_name = convert_one_file(r_code,output_folder,import_prefix,feedback,
-                                                             open(full_output_file_name,"r").read())
-                    feedback=verify_code_quality(full_output_file_name,output_folder)
+                    full_output_file_name = convert_one_file(file_name=r_code,
+                                                             output_folder = output_code_folder,
+                                                             import_prefix=import_prefix,
+                                                             feedback_msg= feedback,
+                                                             old_code=open(full_output_file_name,"r").read(),
+                                                             mode="code",
+                                                             pkg_name=output_folder_name
+                                                             )
+                    feedback=verify_code_quality(full_output_file_name,matching_unit_test,output_folder)
                     if feedback is None:
                         break
                     current_iteration +=1
