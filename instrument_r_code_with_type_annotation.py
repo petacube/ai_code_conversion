@@ -49,10 +49,19 @@ func_calls = parsed_code[parsed_code["token"] == "SYMBOL_FUNCTION_CALL"]
 funcs_to_filter = pd.read_csv("analysis/r_base_functions.txt")
 func_calls = func_calls[~func_calls["text"].isin(funcs_to_filter["base_functions"])]
 func_calls = func_calls[~func_calls["text"].isin(["print_debug"])]
+
+num_inserts=0
 for idx, func_rec in func_calls.iterrows():
-    num_inserts=0
     result_line = parsed_code[(parsed_code["token"] == "SYMBOL") & (parsed_code["line1"] <= func_rec["line1"])]["line1"].max()
     result_var = parsed_code[(parsed_code["line1"] == result_line) & (parsed_code["token"] == "SYMBOL")].iloc[0].text
+
+    # make sure there is left assign
+    left_assign = parsed_code[(parsed_code["token"] == "LEFT_ASSIGN") & (parsed_code["line1"] <= func_rec["line1"]) & ( parsed_code["line1"] >= result_line)]
+
+    if (len(left_assign) != 1):
+        result_line=-1
+        result_var=None
+    
     # find params of the functions
     open_bracket_line_rec = parsed_code[(parsed_code["text"] == "(") & (parsed_code["line1"] >= func_rec["line1"])].iloc[0]
     open_line_num = open_bracket_line_rec["line1"]
@@ -63,18 +72,23 @@ for idx, func_rec in func_calls.iterrows():
                          (parsed_code["line1"] >= open_line_num) & 
                          (parsed_code["line1"] <= closing_bracket_line_num) &
                          (parsed_code["id"] > func_rec["id"])]["text"]
-    code_to_inject = "\n".join(list(map(lambda var: f"print_debug({var})",param))) + "\n"
-    result_to_inject = f"print_debug({result_var})" + "\n"
+    if (len(params) == 0):
+        continue
+    code_to_inject = "\n".join(list(map(lambda var: f"print_debug({var})",params))) + "\n"
+    if result_var is not None:
+        result_to_inject = f"print_debug({result_var})" + "\n"
     # calcuate entry points - results needs to be printed after function call
     # params need to be printed before function call
-    injected_code.insert(result_line,code_to_inject)
+    injected_code.insert(result_line + num_inserts -1,code_to_inject)
     num_inserts+=1
-    injected_code.insert(closing_bracket_line_num + num_inserts,result_to_inject)
-    num_inserts+=1
+
+    if result_var is not None:
+        injected_code.insert(closing_bracket_line_num + num_inserts + 1,result_to_inject)
+        num_inserts+=1
     
     persist_temp_output(temp_output_r,injected_code)
     # compute new pair
-    source_code, injected_code, parsed_code = compute_r_parsing(input_code=temp_output_r,output_file=output_file)
+#    source_code, injected_code, parsed_code = compute_r_parsing(input_code=temp_output_r,output_file=output_file)
     
 pass
 
