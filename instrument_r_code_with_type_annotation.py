@@ -36,6 +36,12 @@ for idx, line in func_calls.iterrows():
     
     # determine the function entry point. 
     line_num_to_inject = function_params[function_params["parent"] == func_id]["line1"].max()  + num_inserts
+    func_name_df = parsed_code[(parsed_code["line1"] == line["line1"]) & (parsed_code["token"] == "SYMBOL")]["text"]
+    if (len(func_name_df) ==1):
+        func_name = func_name_df.values[0]
+    else:
+        func_name = "Cant determine"
+    print(f"injecting at {line_num_to_inject} for function def {func_name} ")
     injected_code.insert(line_num_to_inject,code_to_inject)
     num_inserts +=1
 
@@ -74,12 +80,20 @@ for idx, func_rec in func_calls.iterrows():
                          (parsed_code["id"] > func_rec["id"])]["text"]
     if (len(params) == 0):
         continue
+
     code_to_inject = "\n".join(list(map(lambda var: f"print_debug({var})",params))) + "\n"
     if result_var is not None:
         result_to_inject = f"print_debug({result_var})" + "\n"
     # calcuate entry points - results needs to be printed after function call
     # params need to be printed before function call
-    injected_code.insert(result_line + num_inserts -1,code_to_inject)
+   
+    if result_var is not None:
+        code_line = result_line + num_inserts -1
+    else:
+        code_line = open_line_num + num_inserts -1
+
+    print(f"injecting (func call params) at {code_line } for func {func_rec['text']}")
+    injected_code.insert(code_line,code_to_inject)
     num_inserts+=1
 
     if result_var is not None:
