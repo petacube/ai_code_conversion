@@ -20,7 +20,7 @@ print_debug2(cars)
 
 # Example usage
 
-print_debug(cars)
+#print_debug(cars)
 
-test_debug()
+#test_debug()
 

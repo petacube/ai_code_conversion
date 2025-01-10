@@ -1,4 +1,3 @@
-source("print_debug.R")
 #' Pivot data from long to wide
 #
 #' @description
@@ -643,17 +642,7 @@ print_debug(values)
   # Recreate desired column order of the new spec columns (#569)
   values <- values[spec$.name]
 
-print_debug(rows)
-print_debug(values)
-print_debug(unused)
-print_debug(names_repair)
-print_debug(error_call)
   out <- wrap_error_names(vec_cbind(
-print_debug(rows)
-print_debug(values)
-print_debug(unused)
-print_debug(names_repair)
-print_debug(error_call)
     rows,
     values,
     unused,
@@ -661,10 +650,6 @@ print_debug(error_call)
     .error_call = error_call
   ))
 
-print_debug(out)
-print_debug(out)
-print_debug(input)
-print_debug(out)
   reconstruct_tibble(input, out)
 }
 
@@ -693,52 +678,29 @@ print_debug(names_sort)
 print_debug(names_vary)
 print_debug(names_expand)
 print_debug(error_call)
-print_debug(...)
   check_dots_empty0(...)
 
-print_debug(names_from)
-print_debug(data)
-print_debug(error_call)
   names_from <- tidyselect::eval_select(
     enquo(names_from),
-print_debug(names_from)
     data,
     allow_rename = FALSE,
     allow_empty = FALSE,
     error_call = error_call
   )
   values_from <- tidyselect::eval_select(
-print_debug(values_from)
-print_debug(data)
-print_debug(error_call)
-print_debug(names_from)
     enquo(values_from),
-print_debug(values_from)
     data,
     allow_rename = FALSE,
     allow_empty = FALSE,
     error_call = error_call
   )
 
-print_debug(values_from)
-print_debug(names_prefix)
-print_debug(error_call)
   check_string(names_prefix, call = error_call)
-print_debug(names_sep)
-print_debug(error_call)
   check_string(names_sep, call = error_call)
-print_debug(names_glue)
-print_debug(error_call)
   check_string(names_glue, allow_null = TRUE, call = error_call)
-print_debug(names_sort)
-print_debug(error_call)
   check_bool(names_sort, call = error_call)
-print_debug(names_expand)
-print_debug(error_call)
   check_bool(names_expand, call = error_call)
 
-print_debug(names_vary)
-print_debug(error_call)
   names_vary <- arg_match0(
     arg = names_vary,
     values = c("fastest", "slowest"),
@@ -746,111 +708,46 @@ print_debug(error_call)
     error_call = error_call
   )
 
-print_debug(names_vary)
-print_debug(data)
   data <- as_tibble(data)
   data <- data[names_from]
-print_debug(data)
 
   if (names_expand) {
     # `expand()` always does sort + unique
-print_debug(data)
-print_debug(data)
     row_ids <- expand(data, !!!syms(names(data)))
-print_debug(data)
   } else {
-print_debug(row_ids)
-print_debug(row_ids)
-print_debug(data)
     row_ids <- vec_unique(data)
 
-print_debug(row_ids)
     if (names_sort) {
-print_debug(row_ids)
       row_ids <- vec_sort(row_ids)
     }
-print_debug(row_ids)
   }
 
-print_debug(paste)
-print_debug(row_ids)
-print_debug(names_sep)
   row_names <- exec(paste, !!!row_ids, sep = names_sep)
 
-print_debug(row_names)
-print_debug(names_prefix)
-print_debug(row_names)
   out <- tibble(
     .name = vec_paste0(names_prefix, row_names)
-print_debug(names_prefix)
-print_debug(row_names)
   )
 
-print_debug(out)
   if (length(values_from) == 1) {
     out$.value <- names(values_from)
   } else {
     if (names_vary == "fastest") {
-print_debug(out)
-print_debug(values_from)
       out <- vec_rep(out, vec_size(values_from))
-print_debug(values_from)
       out$.value <- vec_rep_each(names(values_from), vec_size(row_ids))
-print_debug(out)
-print_debug(values_from)
-print_debug(row_ids)
-print_debug(out)
-print_debug(row_ids)
       row_ids <- vec_rep(row_ids, vec_size(values_from))
-print_debug(out)
-print_debug(row_ids)
-print_debug(values_from)
-print_debug(out)
-print_debug(values_from)
     } else {
-print_debug(row_ids)
-print_debug(row_ids)
-print_debug(out)
-print_debug(values_from)
       out <- vec_rep_each(out, vec_size(values_from))
-print_debug(values_from)
       out$.value <- vec_rep(names(values_from), vec_size(row_ids))
-print_debug(out)
-print_debug(values_from)
-print_debug(row_ids)
-print_debug(out)
-print_debug(row_ids)
       row_ids <- vec_rep_each(row_ids, vec_size(values_from))
-print_debug(out)
-print_debug(row_ids)
-print_debug(values_from)
-print_debug(out)
-print_debug(values_from)
     }
-print_debug(row_ids)
-print_debug(row_ids)
 
-print_debug(out)
-print_debug(.value)
-print_debug(names_sep)
-print_debug(out)
-print_debug(.name)
     out$.name <- vec_paste0(out$.value, names_sep, out$.name)
   }
-print_debug(out)
 
-print_debug(out)
-print_debug(row_ids)
   out <- vec_cbind(out, as_tibble(row_ids), .name_repair = "minimal")
-print_debug(row_ids)
   if (!is.null(names_glue)) {
-print_debug(out)
-print_debug(out)
-print_debug(out)
-print_debug(names_glue)
     out$.name <- as.character(glue::glue_data(out, names_glue))
   }
-print_debug(out)
 
   out
 }
@@ -865,35 +762,20 @@ print_debug(id_cols)
 print_debug(names_from)
 print_debug(values_from)
 print_debug(error_call)
-print_debug(names_from)
-print_debug(data)
-print_debug(error_call)
   names_from <- tidyselect::eval_select(
     enquo(names_from),
-print_debug(names_from)
     data,
     allow_rename = FALSE,
     error_call = error_call
   )
 
-print_debug(names_from)
-print_debug(values_from)
-print_debug(data)
-print_debug(error_call)
   values_from <- tidyselect::eval_select(
     enquo(values_from),
-print_debug(values_from)
     data,
     allow_rename = FALSE,
     error_call = error_call
   )
 
-print_debug(values_from)
-print_debug(data)
-print_debug(id_cols)
-print_debug(names_from)
-print_debug(values_from)
-print_debug(error_call)
   out <- select_wider_id_cols(
     data = data,
     id_cols = {{ id_cols }},
@@ -902,8 +784,6 @@ print_debug(error_call)
     error_call = error_call
   )
 
-print_debug(out)
-print_debug(out)
   expr(c(!!!out))
 }
 
@@ -917,46 +797,25 @@ print_debug(id_cols)
 print_debug(names_from_cols)
 print_debug(values_from_cols)
 print_debug(error_call)
-print_debug(id_cols)
   id_cols <- enquo(id_cols)
 
-print_debug(id_cols)
   # Remove known non-id-cols so they are never selected
   data <- data[setdiff(names(data), c(names_from_cols, values_from_cols))]
 
-print_debug(id_cols)
   if (quo_is_null(id_cols)) {
     # Default selects everything in `data` after non-id-cols have been removed
     return(names(data))
   }
 
-print_debug(id_cols)
-print_debug(id_cols)
-print_debug(data)
-print_debug(error_call)
-print_debug(cnd)
-print_debug(cnd)
-print_debug(names_from_cols)
-print_debug(values_from_cols)
-print_debug(error_call)
   try_fetch(
-print_debug(id_cols)
-print_debug(data)
-print_debug(error_call)
     id_cols <- tidyselect::eval_select(
       enquo(id_cols),
-print_debug(id_cols)
       data,
       allow_rename = FALSE,
       error_call = error_call
     ),
     vctrs_error_subscript_oob = function(cnd) {
-print_debug(id_cols)
 print_debug(cnd)
-print_debug(cnd)
-print_debug(names_from_cols)
-print_debug(values_from_cols)
-print_debug(error_call)
       rethrow_id_cols_oob(cnd, names_from_cols, values_from_cols, error_call)
     }
   )
@@ -971,16 +830,11 @@ print_debug(values_from_cols)
 print_debug(call)
   i <- cnd[["i"]]
 
-print_debug(i)
   check_string(i, .internal = TRUE)
 
   if (i %in% names_from_cols) {
-print_debug(i)
-print_debug(call)
     stop_id_cols_oob(i, "names_from", call = call)
   } else if (i %in% values_from_cols) {
-print_debug(i)
-print_debug(call)
     stop_id_cols_oob(i, "values_from", call = call)
   } else {
     # Zap this special handler, throw the normal condition
@@ -991,7 +845,6 @@ print_debug(call)
 stop_id_cols_oob <- function(i, arg, call) {
 print_debug(i)
 print_debug(arg)
-print_debug(call)
 print_debug(call)
   cli::cli_abort(
     c(
@@ -1013,10 +866,8 @@ print_debug(...)
 print_debug(fn_call)
 print_debug(error_call)
 print_debug(user_env)
-print_debug(...)
   dots <- enquos(...)
 
-print_debug(dots)
   # If `id_cols` is specified by name by the user, it will show up in the call.
   # Otherwise, default args don't show up in the call so it won't be there.
   user_specified_id_cols <- "id_cols" %in% names(fn_call)
@@ -1027,21 +878,14 @@ print_debug(dots)
   use_compat_id_cols <-
     !user_specified_id_cols &&
     length(dots) == 1L &&
-print_debug(dots)
     !is_named(dots)
 
   if (use_compat_id_cols) {
     id_cols <- dots[[1L]]
-print_debug(id_cols)
-print_debug(user_env)
     warn_deprecated_unnamed_id_cols(id_cols, user_env = user_env)
   } else {
-print_debug(id_cols)
     id_cols <- enquo(id_cols)
     check_dots_empty0(..., call = error_call)
-print_debug(...)
-print_debug(error_call)
-print_debug(id_cols)
   }
 
   id_cols
@@ -1050,11 +894,8 @@ print_debug(id_cols)
 warn_deprecated_unnamed_id_cols <- function(id_cols, user_env = caller_env(2)) {
 print_debug(id_cols)
 print_debug(user_env)
-print_debug(id_cols)
   id_cols <- as_label(id_cols)
-print_debug(user_env)
 
-print_debug(id_cols)
   lifecycle::deprecate_warn(
     when = "1.3.0",
     what = I(cli::format_inline(
@@ -1067,7 +908,6 @@ print_debug(id_cols)
     user_env = user_env
   )
 }
-print_debug(id_cols)
 
 # Helpers -----------------------------------------------------------------
 
@@ -1078,28 +918,19 @@ print_debug(value_name)
 print_debug(fn)
 print_debug(fn_name)
 print_debug(error_call)
-print_debug(value)
-print_debug(value_locs)
   value <- vec_chop(value, value_locs)
 
-print_debug(value)
   if (identical(fn, list)) {
     # The no-op case, for performance
     return(value)
   }
 
-print_debug(value)
-print_debug(fn)
   value <- map(value, fn)
 
-print_debug(value)
-print_debug(value)
   sizes <- list_sizes(value)
   invalid_sizes <- sizes != 1L
-print_debug(sizes)
 
   if (any(invalid_sizes)) {
-print_debug(error_call)
     size <- sizes[invalid_sizes][[1]]
 
     cli::cli_abort(
@@ -1110,12 +941,9 @@ print_debug(error_call)
       call = error_call
     )
   }
-print_debug(size)
 
-print_debug(value)
   value <- list_unchop(value)
 
-print_debug(value)
   value
 }
 
@@ -1123,35 +951,22 @@ print_debug(value)
 chop_rectangular_df <- function(x, names) {
 print_debug(x)
 print_debug(names)
-print_debug(names)
   n_col <- vec_size(names)
   n_row <- vec_size(x) / n_col
-print_debug(x)
-print_debug(n_col)
-print_debug(n_col)
 
-print_debug(n_row)
   indices <- vector("list", n_col)
 
   start <- 1L
   stop <- n_row
 
   for (i in seq_len(n_col)) {
-print_debug(start)
-print_debug(stop)
     indices[[i]] <- seq2(start, stop)
     start <- start + n_row
-print_debug(indices)
     stop <- stop + n_row
   }
 
-print_debug(x)
-print_debug(indices)
   out <- vec_chop(x, indices)
   names(out) <- names
-print_debug(out)
-print_debug(out)
-print_debug(n_row)
   tibble::new_tibble(out, nrow = n_row)
 }
 
@@ -1161,14 +976,9 @@ print_debug(x)
     return(FALSE)
   }
 
-print_debug(x)
   if (vec_is_list(x)) {
-print_debug(x)
-print_debug(x)
-print_debug(x)
     (vec_size(x) == 1) && !have_name(x)
   } else {
-print_debug(x)
     vec_size(x) == 1
   }
 }
@@ -1178,10 +988,7 @@ print_debug(x)
   ok <- make.names(x) == x
   ok[is.na(x)] <- FALSE
 
-print_debug(x)
-print_debug(ok)
   x[!ok] <- glue::backtick(x[!ok])
 
-print_debug(x)
   x
 }
